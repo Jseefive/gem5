@@ -153,17 +153,22 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
     RoutingAlgorithm routing_algorithm =
         (RoutingAlgorithm) m_router->get_net_ptr()->getRoutingAlgorithm();
 
+    //// Updown Routing: Implement of routing switch function
+    // code begin
     switch (routing_algorithm) {
         case TABLE_:  outport =
             lookupRoutingTable(route.vnet, route.net_dest); break;
         case XY_:     outport =
             outportComputeXY(route, inport, inport_dirn); break;
+        case UPDN_:     outport =
+            outportComputeUPDN(route, inport, inport_dirn); break;
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
         default: outport =
             lookupRoutingTable(route.vnet, route.net_dest); break;
     }
+    // code end
 
     assert(outport != -1);
     return outport;
@@ -227,6 +232,50 @@ RoutingUnit::outportComputeXY(RouteInfo route,
 
     return m_outports_dirn2idx[outport_dirn];
 }
+
+//// Updown Routing: Implement of Updown Routing
+// code begin
+int
+RoutingUnit::outportComputeUPDN(RouteInfo route,
+                    int inport,
+                    PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+
+    // get curr_id, dest_id and stc_id
+    int curr_id = m_router->get_id();
+    int src_id = route.src_router;
+    int dest_id = route.dest_router;
+
+    // if current id is the source id
+    if (curr_id == src_id) {
+        // this means that it's the beginning
+        outport_dirn = m_router->get_net_ptr()->\
+            routingTable[src_id][dest_id][0].direction_;
+    } else {
+        // for cycle until match the target index:
+        for (int indx= 0; indx < m_router->get_net_ptr()->\
+            routingTable[src_id][dest_id].size(); indx++) {
+            // choose next port from routingTable
+            if (m_router->get_net_ptr()->\
+                routingTable[src_id][dest_id][indx].\
+                next_router_id == curr_id) {
+                outport_dirn = m_router->get_net_ptr()->\
+                    routingTable[src_id][dest_id][indx+1].direction_;
+                break;
+            }
+        }
+    }
+
+    assert(outport_dirn != "Unknown");
+    //cout << "curr_id: " << curr_id << endl;
+    //cout << "dest_id: " << dest_id << endl;
+    //cout << "outport_dirn: " << outport_dirn << endl;
+    /*cout << "m_outports_dirn2idx[outport_dirn]: " \
+    << m_outports_dirn2idx[outport_dirn] << endl;*/
+    return m_outports_dirn2idx[outport_dirn];
+}
+// code end
 
 // Template for implementing custom routing algorithm
 // using port directions. (Example adaptive)
