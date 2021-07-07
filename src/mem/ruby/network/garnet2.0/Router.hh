@@ -67,9 +67,14 @@ class Router : public BasicRouter, public Consumer
     void init();
     void addInPort(PortDirection inport_dirn, NetworkLink *link,
                    CreditLink *credit_link);
-    void addOutPort(PortDirection outport_dirn, NetworkLink *link,
+
+    //// Updown Routing+: Implement of Updown Routing
+    // code begin
+    void addOutPort(SwitchID dest,
+                    PortDirection outport_dirn, NetworkLink *link,
                     const NetDest& routing_table_entry,
                     int link_weight, CreditLink *credit_link);
+    // code end
 
     Cycles get_pipe_stages(){ return m_latency; }
     int get_num_vcs()       { return m_num_vcs; }

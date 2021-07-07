@@ -160,10 +160,14 @@ class GarnetNetwork : public Network
         m_total_hops += hops;
     }
 
-    //// Updown Routing
+    //// irregular_Mesh_XY
+    //// SWNoC
     // code begin
     std::string conf_file;
+    // code end
 
+    //// Updown Routing
+    // code begin
     struct entry {
     int next_router_id;
     std::string direction_;

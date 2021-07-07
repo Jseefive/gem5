@@ -62,6 +62,7 @@ def define_options(parser):
                       help="""number of virtual channels per virtual network
                             inside garnet network.""")
     #### Updown Routing: Add options
+    #### Updown Routing+: Add options
     ## code begin
     parser.add_option("--routing-algorithm", action="store", type="int",
                       default=0,
@@ -69,7 +70,8 @@ def define_options(parser):
                             0: weight-based table
                             1: XY (for Mesh. see garnet2.0/RoutingUnit.cc)
                             2: Updown (see garnet2.0/RoutingUnit.cc)
-                            3: Custom (see garnet2.0/RoutingUnit.cc)""")
+                            3: Updown+ (for SWNoC. see...)
+                            4: Custom (see garnet2.0/RoutingUnit.cc)""")
     ## code end
     parser.add_option("--network-fault-model", action="store_true",
                       default=False,
@@ -79,9 +81,10 @@ def define_options(parser):
                       type="int", default=50000,
                       help="network-level deadlock threshold.")
     #### irregular_Mesh_XY: add configs file option
+    #### SWNoC: add configs file option
     ## code begin
     parser.add_option("--conf-file", type="string",
-                  default="16_nodes-connectivity_matrix_9-links_removed_4.txt",
+                  default="configs/topologies/SWNoC/SWNoC_config.txt",
                   help="check configs/topologies for complete set")
     ## code end
 
@@ -118,6 +121,7 @@ def init_network(options, network, InterfaceClass):
         network.routing_algorithm = options.routing_algorithm
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
         #### irregular_Mesh_XY: add configs file option
+        #### SWNoC: add configs file option
         ## code begin
         network.conf_file = options.conf_file
         ## code end

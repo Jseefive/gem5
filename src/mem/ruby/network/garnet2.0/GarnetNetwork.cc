@@ -62,6 +62,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     m_buffers_per_ctrl_vc = p->buffers_per_ctrl_vc;
     m_routing_algorithm = p->routing_algorithm;
     //// irregular_Mesh_XY
+    //// SWNoC
     // code begin
     conf_file = p->conf_file;
     cout << "Configuration file to read from: "\
@@ -107,6 +108,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
 }
 
 //// Updown Routing
+//// Updown Routing+
 // code begin
 
 // populate_routingTable() called by configure_network(),
@@ -144,8 +146,10 @@ GarnetNetwork::populate_routingTable\
             // skip do nothing...
         }
         else {
-            cout << " this is not possible" << endl;
-            assert(0);
+            //// Updown Routing
+            entry_ = {path_[nxt_], "X"};
+            // cout << " this is not possible" << endl;
+            // assert(0);
         }
 
         // push entry_ to the end of routingTable
@@ -430,9 +434,14 @@ GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
     m_creditlinks.push_back(credit_link);
 
     PortDirection src_outport_dirn = "Local";
-    m_routers[src]->addOutPort(src_outport_dirn, net_link,
+
+    //// Updown Routing+: Implement of Updown Routing
+    // code begin
+    m_routers[src]->addOutPort(dest, src_outport_dirn, net_link,
                                routing_table_entry,
                                link->m_weight, credit_link);
+    // code end
+
     m_nis[dest]->addInPort(net_link, credit_link);
 }
 
@@ -458,9 +467,16 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
     m_creditlinks.push_back(credit_link);
 
     m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
-    m_routers[src]->addOutPort(src_outport_dirn, net_link,
+
+    //// Updown Routing+: Implement of Updown Routing
+    // code begin
+    // cout << endl;
+    // cout << "src:" << src << endl;
+    m_routers[src]->addOutPort(dest, src_outport_dirn, net_link,
                                routing_table_entry,
                                link->m_weight, credit_link);
+    // code end
+
 }
 
 // Total routers in the network

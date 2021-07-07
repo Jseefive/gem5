@@ -41,9 +41,10 @@ enum VNET_type {CTRL_VNET_, DATA_VNET_, NULL_VNET_, NUM_VNET_TYPE_};
 enum flit_stage {I_, VA_, SA_, ST_, LT_, NUM_FLIT_STAGE_};
 enum link_type { EXT_IN_, EXT_OUT_, INT_, NUM_LINK_TYPES_ };
 //// Updown Routing: Define options
+//// Updown Routing+: Define options
 // code begin
-enum RoutingAlgorithm { TABLE_ = 0, XY_ = 1, UPDN_ = 2, CUSTOM_ = 3,
-                        NUM_ROUTING_ALGORITHM_};
+enum RoutingAlgorithm { TABLE_ = 0, XY_ = 1, UPDN_ = 2, UPDNP_ = 3,
+                        CUSTOM_ = 4, NUM_ROUTING_ALGORITHM_};
 // code end
 
 struct RouteInfo

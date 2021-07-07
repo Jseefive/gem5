@@ -120,12 +120,22 @@ RoutingUnit::addInDirection(PortDirection inport_dirn, int inport_idx)
     m_inports_idx2dirn[inport_idx]  = inport_dirn;
 }
 
+//// Updown Routing+: Implement of Updown Routing
+// code begin
 void
-RoutingUnit::addOutDirection(PortDirection outport_dirn, int outport_idx)
+RoutingUnit::addOutDirection(SwitchID dest,\
+PortDirection outport_dirn, int outport_idx)
 {
     m_outports_dirn2idx[outport_dirn] = outport_idx;
     m_outports_idx2dirn[outport_idx]  = outport_dirn;
+    if (outport_dirn != "Local") {
+        m_nxt_router_id2idx[dest] = outport_idx;
+        // cout << "dest:" << dest << endl;
+        // cout << "outport_dirn:" << outport_dirn << endl;
+        // cout << "outport_idx:" << outport_idx << endl;
+    }
 }
+// code end
 
 // outportCompute() is called by the InputUnit
 // It calls the routing table by default.
@@ -154,6 +164,7 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
         (RoutingAlgorithm) m_router->get_net_ptr()->getRoutingAlgorithm();
 
     //// Updown Routing: Implement of routing switch function
+    //// Updown Routing+: Implement of routing switch function
     // code begin
     switch (routing_algorithm) {
         case TABLE_:  outport =
@@ -162,6 +173,8 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
             outportComputeXY(route, inport, inport_dirn); break;
         case UPDN_:     outport =
             outportComputeUPDN(route, inport, inport_dirn); break;
+        case UPDNP_:     outport =
+            outportComputeUPDNP(route, inport, inport_dirn); break;
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
@@ -274,6 +287,57 @@ RoutingUnit::outportComputeUPDN(RouteInfo route,
     /*cout << "m_outports_dirn2idx[outport_dirn]: " \
     << m_outports_dirn2idx[outport_dirn] << endl;*/
     return m_outports_dirn2idx[outport_dirn];
+}
+// code end
+
+//// Updown Routing+: Implement of Updown Routing
+// code begin
+int
+RoutingUnit::outportComputeUPDNP(RouteInfo route,
+                    int inport,
+                    PortDirection inport_dirn)
+{
+    //PortDirection outport_dirn = "Unknown";
+    int nxt_router_id = 0;
+
+    // get curr_id, dest_id and stc_id
+    int curr_id = m_router->get_id();
+    int src_id = route.src_router;
+    int dest_id = route.dest_router;
+
+    // if current id is the source id
+    if (curr_id == src_id) {
+        // this means that it's the beginning
+        nxt_router_id = m_router->get_net_ptr()->\
+            routingTable[src_id][dest_id][0].next_router_id;
+    } else {
+        // for cycle until match the target index:
+        for (int indx= 0; indx < m_router->get_net_ptr()->\
+            routingTable[src_id][dest_id].size(); indx++) {
+            // choose next port from routingTable
+            if (m_router->get_net_ptr()->\
+                routingTable[src_id][dest_id][indx].\
+                next_router_id == curr_id) {
+                nxt_router_id = m_router->get_net_ptr()->\
+                    routingTable[src_id][dest_id][indx+1].next_router_id;
+                break;
+            }
+        }
+    }
+
+    //assert(outport_dirn != "Unknown");
+    //cout << endl;
+    //cout << "curr_id: " << curr_id << endl;
+    //cout << "dest_id: " << dest_id << endl;
+    //cout << "outport_dirn: " << outport_dirn << endl;
+    /*cout << "m_outports_dirn2idx[outport_dirn]: " \
+    << m_outports_dirn2idx[outport_dirn] << endl;*/
+    //cout << "nxt_router_id: " << nxt_router_id << endl;
+    /*cout << "m_nxt_router_id2idx[nxt_router_id]: " \
+    << m_nxt_router_id2idx[nxt_router_id] << endl;*/
+
+    //return m_outports_dirn2idx[outport_dirn];
+    return m_nxt_router_id2idx[nxt_router_id];
 }
 // code end
 

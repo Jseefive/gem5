@@ -57,7 +57,11 @@ class RoutingUnit
 
     // Topology-specific direction based routing
     void addInDirection(PortDirection inport_dirn, int inport);
-    void addOutDirection(PortDirection outport_dirn, int outport);
+    //// Updown Routing+: Implement of Updown Routing
+    // code begin
+    void addOutDirection(SwitchID dest,\
+    PortDirection outport_dirn, int outport);
+    // code end
 
     // Routing for Mesh
     int outportComputeXY(RouteInfo route,
@@ -70,6 +74,14 @@ class RoutingUnit
                          int inport,
                          PortDirection inport_dirn);
     // code end
+
+    //// Updown Routing+: Declare routing function
+    // code begin
+    int outportComputeUPDNP(RouteInfo route,
+                         int inport,
+                         PortDirection inport_dirn);
+    // code end
+
 
     // Custom Routing Algorithm using Port Directions
     int outportComputeCustom(RouteInfo route,
@@ -88,6 +100,10 @@ class RoutingUnit
     std::map<int, PortDirection> m_inports_idx2dirn;
     std::map<int, PortDirection> m_outports_idx2dirn;
     std::map<PortDirection, int> m_outports_dirn2idx;
+    //// Updown Routing+: Declare routing function
+    // code begin
+    std::map<int, int> m_nxt_router_id2idx;
+    // code end
 };
 
 #endif // __MEM_RUBY_NETWORK_GARNET2_0_ROUTINGUNIT_HH__
