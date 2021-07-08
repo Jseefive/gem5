@@ -56,6 +56,10 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     : Network(p)
 {
     m_num_rows = p->num_rows;
+    //// Mesh XYZ
+    // code begin
+    m_num_layers = p->num_layers;
+    // code end
     m_ni_flit_size = p->ni_flit_size;
     m_vcs_per_vnet = p->vcs_per_vnet;
     m_buffers_per_data_vc = p->buffers_per_data_vc;
@@ -64,9 +68,11 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     //// irregular_Mesh_XY
     //// SWNoC
     // code begin
-    conf_file = p->conf_file;
-    cout << "Configuration file to read from: "\
-        << conf_file << endl;
+    if ((m_routing_algorithm ==2) or (m_routing_algorithm == 3)) {
+        conf_file = p->conf_file;
+        cout << "Configuration file to read from: "\
+            << conf_file << endl;
+    }
     // code end
     m_enable_fault_model = p->enable_fault_model;
     if (m_enable_fault_model)
@@ -102,8 +108,10 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     //// Updown Routing
     // code begin
     // resize the routingTable
-    routingTable.resize(m_routers.size());
-    configure_network();
+    if ((m_routing_algorithm ==2) or (m_routing_algorithm == 3)) {
+        routingTable.resize(m_routers.size());
+        configure_network();
+    }
     // code end
 }
 
@@ -356,11 +364,21 @@ GarnetNetwork::init()
         // m_num_rows and m_num_cols are only used for
         // implementing XY or custom routing in RoutingUnit.cc
         m_num_rows = getNumRows();
-        m_num_cols = m_routers.size() / m_num_rows;
-        assert(m_num_rows * m_num_cols == m_routers.size());
+
+        //// Mesh_XYZ
+        // code begin
+        m_num_layers = getNumLayers();
+        m_num_cols = (m_routers.size() / m_num_layers) / m_num_rows;
+        assert(m_num_rows * m_num_cols * m_num_layers == m_routers.size());
+        // code end
+
     } else {
         m_num_rows = -1;
         m_num_cols = -1;
+        //// Mesh_XYZ
+        // code begin
+        m_num_layers = -1;
+        // code end
     }
 
     // FaultModel: declare each router to the fault model

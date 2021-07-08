@@ -44,7 +44,8 @@ enum link_type { EXT_IN_, EXT_OUT_, INT_, NUM_LINK_TYPES_ };
 //// Updown Routing+: Define options
 // code begin
 enum RoutingAlgorithm { TABLE_ = 0, XY_ = 1, UPDN_ = 2, UPDNP_ = 3,
-                        CUSTOM_ = 4, NUM_ROUTING_ALGORITHM_};
+                        XYZ_ = 4, CUSTOM_ = 5,
+                        NUM_ROUTING_ALGORITHM_};
 // code end
 
 struct RouteInfo

@@ -168,7 +168,7 @@ class SWNoC(SimpleTopology):
         % (num_columnss, cols_)
         ## code end
 
-        ################ ext_links ################
+        ################ int_links ################
         # Create the mesh links.
         int_links = []
 

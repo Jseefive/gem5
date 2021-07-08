@@ -81,6 +81,11 @@ class GarnetNetwork : public Network
     int getNumRows() const { return m_num_rows; }
     int getNumCols() { return m_num_cols; }
 
+    //// Mesh_XYZ
+    // code begin
+    int getNumLayers() const { return m_num_layers; }
+    // code end
+
     // for network
     uint32_t getNiFlitSize() const { return m_ni_flit_size; }
     uint32_t getVCsPerVnet() const { return m_vcs_per_vnet; }
@@ -208,6 +213,10 @@ class GarnetNetwork : public Network
     // Configuration
     int m_num_rows;
     int m_num_cols;
+    //// Mesh_XYZ
+    // code begin
+    int m_num_layers;
+    // code end
     uint32_t m_ni_flit_size;
     uint32_t m_vcs_per_vnet;
     uint32_t m_buffers_per_ctrl_vc;

@@ -40,8 +40,8 @@ from topologies.BaseTopology import SimpleTopology
 # XY routing is enforced (using link weights)
 # to guarantee deadlock freedom.
 
-class irregular_Mesh_XY(SimpleTopology):
-    description='irregular_Mesh_XY'
+class Mesh_3D(SimpleTopology):
+    description='Mesh_3D'
 
     def __init__(self, controllers):
         self.nodes = controllers
@@ -55,6 +55,12 @@ class irregular_Mesh_XY(SimpleTopology):
 
         num_routers = options.num_cpus
         num_rows = options.mesh_rows
+        #### 3D NoC: Add layers parameter
+        ## code begin
+        num_layers = options.mesh_layers
+        num_planars = int(num_routers / num_layers)
+        num_columns = int(num_planars / num_rows)
+        ## code end
 
         ######### latency define and parameter check #########
         # default values for link latency and router latency.
@@ -62,13 +68,15 @@ class irregular_Mesh_XY(SimpleTopology):
         link_latency = options.link_latency # used by simple and garnet
         router_latency = options.router_latency # only used by garnet
 
-
         # There must be an evenly divisible number of cntrls to routers
         # Also, obviously the number or rows must be <= the number of routers
         cntrls_per_router, remainder = divmod(len(nodes), num_routers)
         assert(num_rows > 0 and num_rows <= num_routers)
-        num_columns = int(num_routers / num_rows)
-        assert(num_columns * num_rows == num_routers)
+        #### 3D NoC: check num_layers
+        ## code begin
+        assert(num_layers > 0 and num_layers <= num_routers)
+        assert(num_columns * num_rows * num_layers == num_routers)
+        ## code end
 
         ################ router setting ################
         # Create the routers in the mesh
@@ -113,71 +121,22 @@ class irregular_Mesh_XY(SimpleTopology):
 
         network.ext_links = ext_links
 
-        #### irregular_Mesh_XY
-        ## code begin
-        input_ = options.conf_file
-        print("Configs file: ", options.conf_file)
-
-        with open (input_, "r") as f:
-            # "r": default mode, read only
-
-            # read network size
-            data_ = f.readline()
-            data = data_.split(" ")
-            rows_ = int(data[0])
-            cols_ = int(data[1])
-            print ("Network rows: %d Network cols: %d" % (rows_, cols_))
-
-            # skip a line 'not necessary'
-            next(f)
-
-            # Now create a list and read all the file content into that list,
-            # later refer to that list to make connections in Mesh.
-
-            # Make an empty list,
-            # list size is (row*col)x(row*col)
-            topology = [[0 for x in range(cols_*rows_)] \
-            for y in range(rows_*cols_)]
-
-            # Read the file content into that list
-            x, y = 0, 0;
-            for line in f:
-                for word in line.split():
-                    topology[x][y] = int(word)
-                    y = y + 1
-                x = x + 1  # increment row
-
-                if ((x == rows_ * cols_) and
-                    (y == rows_ * cols_)):
-                    break
-
-                y = 0 # reset col index on each row completetion
-
-        # num_rows must match rows_
-        # num_columns must match columns_
-        assert (num_rows == rows_),\
-        "Both topology-row: %d and commandline-row: %d must match" \
-        % (num_rows, rows_)
-        assert (num_columns == cols_),\
-        "Both topology-col: %d and commandline-col: %d must match" \
-        % (num_columnss, cols_)
-        ## code end
-
         ################ int_links ################
         # Create the mesh links.
         int_links = []
 
-        # East output to West input links (weight = 1)
-        for row in range(num_rows):
-            for col in range(num_columns):
-                if (col + 1 < num_columns):
-                    #### irregular_Mesh_XY
-                    ## code begin
-                    if(topology[num_rows*row + col][num_rows*row + (col+1)] \
-                    == 1):
-                    ## code end
-                        east_out = col + (row * num_columns)
-                        west_in = (col + 1) + (row * num_columns)
+        # planar_links
+        #### 3D NoC: planar_links
+        ## code begin
+        for lay in range(num_layers):
+            # East output to West input links (weight = 1)
+            for row in range(num_rows):
+                for col in range(num_columns):
+                    if (col + 1 < num_columns):
+                        east_out = col + (row * num_columns) + \
+                        (lay * num_planars)
+                        west_in = (col + 1) + (row * num_columns) + \
+                        (lay * num_planars)
                         int_links.append(IntLink(link_id=link_count,
                                                  src_node=routers[east_out],
                                                  dst_node=routers[west_in],
@@ -187,14 +146,14 @@ class irregular_Mesh_XY(SimpleTopology):
                                                  weight=1))
                         link_count += 1
 
-        # West output to East input links (weight = 1)
-        for row in range(num_rows):
-            for col in range(num_columns):
-                if (col + 1 < num_columns):
-                    if(topology[num_rows*row + (col+1)][num_rows*row + col] \
-                    == 1):
-                        east_in = col + (row * num_columns)
-                        west_out = (col + 1) + (row * num_columns)
+            # West output to East input links (weight = 1)
+            for row in range(num_rows):
+                for col in range(num_columns):
+                    if (col + 1 < num_columns):
+                        east_in = col + (row * num_columns) + \
+                        (lay * num_planars)
+                        west_out = (col + 1) + (row * num_columns) + \
+                        (lay * num_planars)
                         int_links.append(IntLink(link_id=link_count,
                                                  src_node=routers[west_out],
                                                  dst_node=routers[east_in],
@@ -204,40 +163,75 @@ class irregular_Mesh_XY(SimpleTopology):
                                                  weight=1))
                         link_count += 1
 
-        # North output to South input links (weight = 2)
-        for col in range(num_columns):
-            for row in range(num_rows):
-                if (row + 1 < num_rows):
-                    if(topology[num_rows*row + col][num_rows*(row+1) + col] \
-                    == 1):
-                        north_out = col + (row * num_columns)
-                        south_in = col + ((row + 1) * num_columns)
+            # North output to South input links (weight = 2)
+            for col in range(num_columns):
+                for row in range(num_rows):
+                    if (row + 1 < num_rows):
+                        north_out = col + (row * num_columns) + \
+                        (lay * num_planars)
+                        south_in = col + ((row + 1) * num_columns) + \
+                        (lay * num_planars)
                         int_links.append(IntLink(link_id=link_count,
                                                  src_node=routers[north_out],
                                                  dst_node=routers[south_in],
                                                  src_outport="North",
                                                  dst_inport="South",
                                                  latency = link_latency,
-                                                 weight=1))
+                                                 weight=2))
                         link_count += 1
 
-        # South output to North input links (weight = 2)
-        for col in range(num_columns):
-            for row in range(num_rows):
-                if (row + 1 < num_rows):
-                    if(topology[num_rows*(row+1) + col][num_rows*row + col] \
-                    == 1):
-                        north_in = col + (row * num_columns)
-                        south_out = col + ((row + 1) * num_columns)
+            # South output to North input links (weight = 2)
+            for col in range(num_columns):
+                for row in range(num_rows):
+                    if (row + 1 < num_rows):
+                        north_in = col + (row * num_columns) + \
+                        (lay * num_planars)
+                        south_out = col + ((row + 1) * num_columns) + \
+                        (lay * num_planars)
                         int_links.append(IntLink(link_id=link_count,
                                                  src_node=routers[south_out],
                                                  dst_node=routers[north_in],
                                                  src_outport="South",
                                                  dst_inport="North",
                                                  latency = link_latency,
-                                                 weight=1))
+                                                 weight=2))
                         link_count += 1
+        ## code end
 
+        # vertical_links
+        #### 3D NoC: vertical_links
+        ## code begin
+        # from up to down
+        for planar in range(num_planars):
+            for lay in range(num_layers):
+                if (lay + 1 < num_layers):
+                    up_out = planar + (lay * num_planars)
+                    down_in = planar + ((lay+1) * num_planars)
+                    int_links.append(IntLink(link_id=link_count,
+                                             src_node=routers[up_out],
+                                             dst_node=routers[down_in],
+                                             src_outport="Up",
+                                             dst_inport="Down",
+                                             latency = link_latency,
+                                             weight=3))
+                    link_count += 1
+
+        # from down to up
+        for planar in range(num_planars):
+            for lay in range(num_layers):
+                if (lay + 1 < num_layers):
+                    down_out = planar + ((lay+1) * num_planars)
+                    up_in = planar + ((lay) * num_planars)
+                    int_links.append(IntLink(link_id=link_count,
+                                             src_node=routers[down_out],
+                                             dst_node=routers[up_in],
+                                             src_outport="Down",
+                                             dst_inport="Up",
+                                             latency = link_latency,
+                                             weight=3))
+                    link_count += 1
+
+        ## code end
 
         network.int_links = int_links
 

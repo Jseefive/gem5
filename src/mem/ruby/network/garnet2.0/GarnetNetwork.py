@@ -38,6 +38,11 @@ class GarnetNetwork(RubyNetwork):
     type = 'GarnetNetwork'
     cxx_header = "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
     num_rows = Param.Int(0, "number of rows if 2D (mesh/torus/..) topology");
+    #### Mesh_XYZ
+    ## code begin
+    num_layers = Param.Int(0, "number of layers if 3D (mesh/torus/..)\
+    topology");
+    ## code end
     ni_flit_size = Param.UInt32(16, "network interface flit size in bytes")
     vcs_per_vnet = Param.UInt32(4, "virtual channels per virtual network");
     buffers_per_data_vc = Param.UInt32(4, "buffers per data virtual channel");
@@ -46,7 +51,8 @@ class GarnetNetwork(RubyNetwork):
     #### Updown Routing+: Add options
     ## code begin
     routing_algorithm = Param.Int(0,
-        "0: Weight-based Table, 1: XY, 2: Updown, 3: Updown+, 4: Custom");
+        "0: Weight-based Table, 1: XY, 2: Updown, 3: Updown+,\
+        4: XYZ, 5: Custom");
     ## code begin
     enable_fault_model = Param.Bool(False, "enable network fault model");
     fault_model = Param.FaultModel(NULL, "network fault model");

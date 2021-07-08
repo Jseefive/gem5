@@ -82,6 +82,12 @@ class RoutingUnit
                          PortDirection inport_dirn);
     // code end
 
+    //// XYZ Routing: Declare routing function
+    // code begin
+    int outportComputeXYZ(RouteInfo route,
+                         int inport,
+                         PortDirection inport_dirn);
+    // code end
 
     // Custom Routing Algorithm using Port Directions
     int outportComputeCustom(RouteInfo route,

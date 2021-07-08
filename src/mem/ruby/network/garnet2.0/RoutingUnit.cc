@@ -175,6 +175,8 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
             outportComputeUPDN(route, inport, inport_dirn); break;
         case UPDNP_:     outport =
             outportComputeUPDNP(route, inport, inport_dirn); break;
+        case XYZ_:     outport =
+            outportComputeXYZ(route, inport, inport_dirn); break;
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
@@ -340,6 +342,90 @@ RoutingUnit::outportComputeUPDNP(RouteInfo route,
     return m_nxt_router_id2idx[nxt_router_id];
 }
 // code end
+
+//// XYZ Routing: Implement of Mesh_XYZ
+// code begin
+int
+RoutingUnit::outportComputeXYZ(RouteInfo route,
+                              int inport,
+                              PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+
+    int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
+    int M5_VAR_USED num_layers = m_router->get_net_ptr()->getNumLayers();
+    // implement getNumlayers() in GarnetNetwork.hh
+
+    int num_cols = m_router->get_net_ptr()->getNumCols();
+
+    assert(num_rows > 0 && num_cols && num_layers> 0);
+
+    int num_planars = num_rows * num_cols;
+
+    int my_id = m_router->get_id();
+    int my_planar_id = my_id % num_planars;
+    int my_z = my_id / num_planars;
+    int my_x = my_planar_id % num_cols;
+    int my_y = my_planar_id / num_cols;
+
+    int dest_id = route.dest_router;
+    int dest_planar_id = dest_id % num_planars;
+    int dest_z = dest_id / num_planars;
+    int dest_x = dest_planar_id % num_cols;
+    int dest_y = dest_planar_id / num_cols;
+
+    int z_hops = abs(dest_z - my_z);
+    int x_hops = abs(dest_x - my_x);
+    int y_hops = abs(dest_y - my_y);
+
+    bool z_dirn = (dest_z >= my_z);
+    bool x_dirn = (dest_x >= my_x);
+    bool y_dirn = (dest_y >= my_y);
+
+    // already checked that in outportCompute() function
+    assert(!(x_hops == 0 && y_hops == 0 && z_hops == 0));
+
+    if (x_hops > 0) {
+        if (x_dirn) {
+            assert(inport_dirn == "Local" || inport_dirn == "West");
+            outport_dirn = "East";
+        } else {
+            assert(inport_dirn == "Local" || inport_dirn == "East");
+            outport_dirn = "West";
+        }
+    } else if (y_hops > 0) {
+        if (y_dirn) {
+            // "Local" or "South" or "West" or "East"
+            assert(inport_dirn == "Local" || inport_dirn == "South" ||\
+            inport_dirn == "West" || inport_dirn == "East");
+            outport_dirn = "North";
+        } else {
+            // "Local" or "North" or "West" or "East"
+            assert(inport_dirn == "Local" || inport_dirn == "North" ||\
+            inport_dirn == "West" || inport_dirn == "East");
+            outport_dirn = "South";
+        }
+    } else if (z_hops > 0) {
+        if (z_dirn) {
+            // "Local" or "Down" or "South" or "North" or "West" or "East"
+            assert(inport_dirn != "Up");
+            outport_dirn = "Up";
+        } else {
+            // "Local" or "Up" or "South" or "North" or "West" or "East"
+            assert(inport_dirn != "Down");
+            outport_dirn = "Down";
+        }
+    } else {
+        // x_hops == 0 , y_hops == 0 and z_hops == 0
+        // this is not possible
+        // already checked that in outportCompute() function
+        panic("x_hops == y_hops == z_hops == 0");
+    }
+
+    return m_outports_dirn2idx[outport_dirn];
+}
+// code end
+
 
 // Template for implementing custom routing algorithm
 // using port directions. (Example adaptive)

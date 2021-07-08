@@ -41,6 +41,11 @@ def define_options(parser):
                       help="check configs/topologies for complete set")
     parser.add_option("--mesh-rows", type="int", default=0,
                       help="the number of rows in the mesh topology")
+    #### 3D NoC: Add layers options
+    ## code begin
+    parser.add_option("--mesh-layers", type="int", default=1,
+                      help="the number of layers in 3D mesh topology")
+    ## code end
     parser.add_option("--network", type="choice", default="simple",
                       choices=['simple', 'garnet2.0'],
                       help="'simple'|'garnet2.0'")
@@ -71,7 +76,8 @@ def define_options(parser):
                             1: XY (for Mesh. see garnet2.0/RoutingUnit.cc)
                             2: Updown (see garnet2.0/RoutingUnit.cc)
                             3: Updown+ (for SWNoC. see...)
-                            4: Custom (see garnet2.0/RoutingUnit.cc)""")
+                            4: XYZ (see garnet2.0/RoutingUnit.cc)
+                            5: Custom (see garnet2.0/RoutingUnit.cc)""")
     ## code end
     parser.add_option("--network-fault-model", action="store_true",
                       default=False,
@@ -116,6 +122,10 @@ def init_network(options, network, InterfaceClass):
 
     if options.network == "garnet2.0":
         network.num_rows = options.mesh_rows
+        #### 3D NoC: Add layers options
+        ## code begin
+        network.num_layers = options.mesh_layers
+        ## code end
         network.vcs_per_vnet = options.vcs_per_vnet
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm
