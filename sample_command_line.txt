@@ -53,3 +53,21 @@ Mesh_XYZ for 3D Mesh:
 --synthetic=shuffle
 -----------
 
+UpDown Routing for 3D SWNoC:
+-----------
+./build/Garnet_standalone/gem5.debug --outdir=m5out/SWNoC_4x4x4 configs/example/garnet_synth_traffic.py  \
+--network=garnet2.0 \
+--num-cpus=64 \
+--num-dirs=64 \
+--topology=SWNoC_3D \
+--conf-file=configs/topologies/SWNoC/SWNoC_3D_config.txt \
+--routing-algorithm=3 \
+--mesh-rows=4  \
+--mesh-layers=4  \
+--sim-cycles=100000 \
+--inj-vnet=0 \
+--injectionrate=0.02 \
+--synthetic=shuffle
+-----------
+
+

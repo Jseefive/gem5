@@ -38,7 +38,7 @@ class GarnetNetwork(RubyNetwork):
     type = 'GarnetNetwork'
     cxx_header = "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
     num_rows = Param.Int(0, "number of rows if 2D (mesh/torus/..) topology");
-    #### Mesh_XYZ
+    #### 3D NoC
     ## code begin
     num_layers = Param.Int(0, "number of layers if 3D (mesh/torus/..)\
     topology");

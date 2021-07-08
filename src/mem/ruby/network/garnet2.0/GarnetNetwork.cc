@@ -56,7 +56,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     : Network(p)
 {
     m_num_rows = p->num_rows;
-    //// Mesh XYZ
+    //// 3D NoC
     // code begin
     m_num_layers = p->num_layers;
     // code end
@@ -181,6 +181,8 @@ GarnetNetwork::configure_network()
     // open the file pointed by conf_file for read
     ifstream inFile(conf_file);
 
+    //// Updown Routing+ for 3D
+    // code begin
     string word;
     // read xlen, ylen
     inFile >> word;
@@ -189,13 +191,27 @@ GarnetNetwork::configure_network()
     int ylen = stoi(word);
 
     assert(m_num_rows == xlen);
-    assert(m_routers.size() == xlen*ylen);
+    // assert(m_routers.size() == xlen*ylen);
+    // assert(m_num_layers == zlen);
+    // assert(m_routers.size() == xlen*ylen*zlen);
 
-    // resize the table
-    routingTable.resize(xlen*ylen);
-    for (int i = 0; i < xlen*ylen; ++i) {
-        routingTable[i].resize(xlen*ylen);
+    if (m_num_layers == 1) {
+        // resize the table
+        routingTable.resize(xlen*ylen);
+        for (int i = 0; i < xlen*ylen; ++i) {
+            routingTable[i].resize(xlen*ylen);
+        }
     }
+    else {
+        inFile >> word;
+        int zlen = stoi(word);
+
+        routingTable.resize(xlen*ylen*zlen);
+        for (int i = 0; i < xlen*ylen*zlen; ++i) {
+            routingTable[i].resize(xlen*ylen*zlen);
+        }
+    }
+    // code end
 
     bool top_ = false;
     bool spinRing = false;
@@ -365,7 +381,7 @@ GarnetNetwork::init()
         // implementing XY or custom routing in RoutingUnit.cc
         m_num_rows = getNumRows();
 
-        //// Mesh_XYZ
+        //// 3D NoC
         // code begin
         m_num_layers = getNumLayers();
         m_num_cols = (m_routers.size() / m_num_layers) / m_num_rows;
@@ -375,7 +391,7 @@ GarnetNetwork::init()
     } else {
         m_num_rows = -1;
         m_num_cols = -1;
-        //// Mesh_XYZ
+        //// 3D NoC
         // code begin
         m_num_layers = -1;
         // code end

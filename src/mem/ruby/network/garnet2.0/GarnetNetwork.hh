@@ -81,7 +81,7 @@ class GarnetNetwork : public Network
     int getNumRows() const { return m_num_rows; }
     int getNumCols() { return m_num_cols; }
 
-    //// Mesh_XYZ
+    //// 3D NoC
     // code begin
     int getNumLayers() const { return m_num_layers; }
     // code end
@@ -213,7 +213,7 @@ class GarnetNetwork : public Network
     // Configuration
     int m_num_rows;
     int m_num_cols;
-    //// Mesh_XYZ
+    //// 3D NoC
     // code begin
     int m_num_layers;
     // code end
