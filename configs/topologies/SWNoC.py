@@ -165,32 +165,12 @@ class SWNoC(SimpleTopology):
         % (num_rows, rows_)
         assert (num_columns == cols_),\
         "Both topology-col: %d and commandline-col: %d must match" \
-        % (num_columnss, cols_)
+        % (num_columns, cols_)
         ## code end
 
         ################ int_links ################
         # Create the mesh links.
         int_links = []
-
-        # East output to West input links (weight = 1)
-        for row in range(num_rows):
-            for col in range(num_columns):
-                if (col + 1 < num_columns):
-                    #### irregular_Mesh_XY
-                    ## code begin
-                    if(topology[num_rows*row + col][num_rows*row + (col+1)] \
-                    == 1):
-                    ## code end
-                        east_out = col + (row * num_columns)
-                        west_in = (col + 1) + (row * num_columns)
-                        int_links.append(IntLink(link_id=link_count,
-                                                 src_node=routers[east_out],
-                                                 dst_node=routers[west_in],
-                                                 src_outport="East",
-                                                 dst_inport="West",
-                                                 latency = link_latency,
-                                                 weight=1))
-                        link_count += 1
 
         #### SWNoC: add links
         ## code begin
@@ -207,8 +187,7 @@ class SWNoC(SimpleTopology):
                     # East to West / West to East links
                     if ((ysrc == ydst) and (xsrc != xdst)):
                         # East output to West input links
-                        # (weight = link length)
-                        link_length = xdst-xsrc
+                        # link_length = xdst-xsrc
                         east_out = src
                         west_in = dst
                         int_links.append(IntLink(link_id=link_count,
@@ -217,7 +196,8 @@ class SWNoC(SimpleTopology):
                                                  src_outport="East",
                                                  dst_inport="West",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
                         # West output to East input links
@@ -229,14 +209,14 @@ class SWNoC(SimpleTopology):
                                                  src_outport="West",
                                                  dst_inport="East",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
                     # North to South / South to North links
                     if ((xsrc == xdst) and (ysrc != ydst)):
                         # North output to South input links
-                        # (weight = link length)
-                        link_length = ydst-ysrc
+                        # link_length = ydst-ysrc
                         north_out = src
                         south_in = dst
                         int_links.append(IntLink(link_id=link_count,
@@ -245,7 +225,8 @@ class SWNoC(SimpleTopology):
                                                  src_outport="North",
                                                  dst_inport="South",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
                         # South output to North input links
@@ -257,16 +238,16 @@ class SWNoC(SimpleTopology):
                                                  src_outport="South",
                                                  dst_inport="North",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
 
                     # NorthEast to SouthWest / SouthWest to NorthEast links
                     if ((xsrc < xdst) and (ysrc < ydst)):
                         # NorthEast output to SouthWest input links
-                        # (weight = link length)
-                        link_length = int(math.ceil((((xdst-xsrc)**2)+\
-                        ((ydst-ysrc)**2))**0.5))
+                        # link_length = int(math.ceil((((xdst-xsrc)**2)+\
+                        # ((ydst-ysrc)**2))**0.5))
                         northeast_out = src
                         southwest_in = dst
                         int_links.append(IntLink(link_id=link_count,
@@ -277,7 +258,8 @@ class SWNoC(SimpleTopology):
                                                  src_outport="NorthEast",
                                                  dst_inport="SouthWest",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
                         # SouthWest output to NorthEast input links
@@ -291,16 +273,16 @@ class SWNoC(SimpleTopology):
                                                  src_outport="SouthWest",
                                                  dst_inport="NorthEast",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
 
                     # NorthWest to SouthEast / SouthEast to NorthWest links
                     if ((xsrc > xdst) and (ysrc < ydst)):
                         # NorthWest output to SouthEast input links
-                        # (weight = link length)
-                        link_length = int(math.ceil((((xsrc-xdst)**2)+\
-                        ((ydst-ysrc)**2))**0.5))
+                        # link_length = int(math.ceil((((xsrc-xdst)**2)+\
+                        # ((ydst-ysrc)**2))**0.5))
                         northwest_out = src
                         southeast_in = dst
                         int_links.append(IntLink(link_id=link_count,
@@ -311,7 +293,8 @@ class SWNoC(SimpleTopology):
                                                  src_outport="NorthWest",
                                                  dst_inport="SouthEast",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
 
                         # SouthWest output to NorthEast input links
@@ -325,7 +308,8 @@ class SWNoC(SimpleTopology):
                                                  src_outport="SouthEast",
                                                  dst_inport="NorthWest",
                                                  latency = link_latency,
-                                                 weight=link_length))
+                                                 # latency = link length,
+                                                 weight=1))
                         link_count += 1
         ## code end
 
