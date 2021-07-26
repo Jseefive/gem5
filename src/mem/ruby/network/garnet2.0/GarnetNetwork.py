@@ -49,10 +49,11 @@ class GarnetNetwork(RubyNetwork):
     buffers_per_ctrl_vc = Param.UInt32(1, "buffers per ctrl virtual channel");
     #### Updown Routing: Add options
     #### Updown Routing+: Add options
+    #### WestFirst: Add options
     ## code begin
     routing_algorithm = Param.Int(0,
         "0: Weight-based Table, 1: XY, 2: Updown, 3: Updown+,\
-        4: XYZ, 5: Custom");
+        4: XYZ, 5: WestFirst, 6: Custom");
     ## code begin
     enable_fault_model = Param.Bool(False, "enable network fault model");
     fault_model = Param.FaultModel(NULL, "network fault model");

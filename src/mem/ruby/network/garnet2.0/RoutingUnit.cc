@@ -165,6 +165,7 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
 
     //// Updown Routing: Implement of routing switch function
     //// Updown Routing+: Implement of routing switch function
+    //// WestFirst: Implement of routing switch function
     // code begin
     switch (routing_algorithm) {
         case TABLE_:  outport =
@@ -177,6 +178,8 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
             outportComputeUPDNP(route, inport, inport_dirn); break;
         case XYZ_:     outport =
             outportComputeXYZ(route, inport, inport_dirn); break;
+        case WEST_FIRST_:     outport =
+            outportComputeWestFirst(route, inport, inport_dirn); break;
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
@@ -421,6 +424,78 @@ RoutingUnit::outportComputeXYZ(RouteInfo route,
         // already checked that in outportCompute() function
         panic("x_hops == y_hops == z_hops == 0");
     }
+
+    return m_outports_dirn2idx[outport_dirn];
+}
+// code end
+
+//// WestFirst: Implement of WestFirst Routing
+// code begin
+int
+RoutingUnit::outportComputeWestFirst(RouteInfo route,
+                              int inport,
+                              PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+
+    int M5_VAR_USED num_rows = m_router->get_net_ptr()->getNumRows();
+    int num_cols = m_router->get_net_ptr()->getNumCols();
+    assert(num_rows > 0 && num_cols > 0);
+
+    int my_id = m_router->get_id();
+    int my_x = my_id % num_cols;
+    int my_y = my_id / num_cols;
+
+    int dest_id = route.dest_router;
+    int dest_x = dest_id % num_cols;
+    int dest_y = dest_id / num_cols;
+
+    int x_hops = abs(dest_x - my_x);
+    int y_hops = abs(dest_y - my_y);
+
+    bool x_dirn = (dest_x >= my_x);
+    bool y_dirn = (dest_y >= my_y);
+
+    // already checked that in outportCompute() function
+    assert(!(x_hops == 0 && y_hops == 0));
+
+    int rand = random() % 2;
+
+    if (x_hops == 0) {
+        // if only y_hops
+        if (y_dirn) {
+            outport_dirn = "North";
+        } else {
+            outport_dirn = "South";
+        }
+    } else if (y_hops == 0) {
+        // if only x_hops
+        if (x_dirn) {
+            outport_dirn = "East";
+        } else {
+            outport_dirn = "West";
+        }
+    } else {
+        // x_hops != 0 and y_hops != 0
+        if (!x_dirn) {
+            // West first
+            outport_dirn = "West";
+        } else if (y_dirn) {
+            outport_dirn = rand ? "East" : "North";
+        } else if (!y_dirn) {
+            outport_dirn = rand ? "East" : "South";
+        }
+    }
+
+    /*
+    if (x_dirn && x_hops != 0 && y_hops !=0) {
+        cout << "my_id:" << my_id << endl;
+        cout << "dest_id:" << dest_id << endl;
+        cout << "rand:" << rand << endl;
+        cout << "outport_dirn:" << outport_dirn << endl;
+        cout << endl;
+        }
+     */
 
     return m_outports_dirn2idx[outport_dirn];
 }

@@ -42,9 +42,10 @@ enum flit_stage {I_, VA_, SA_, ST_, LT_, NUM_FLIT_STAGE_};
 enum link_type { EXT_IN_, EXT_OUT_, INT_, NUM_LINK_TYPES_ };
 //// Updown Routing: Define options
 //// Updown Routing+: Define options
+//// WestFirst: Define options
 // code begin
 enum RoutingAlgorithm { TABLE_ = 0, XY_ = 1, UPDN_ = 2, UPDNP_ = 3,
-                        XYZ_ = 4, CUSTOM_ = 5,
+                        XYZ_ = 4, WEST_FIRST_ = 5, CUSTOM_ = 6,
                         NUM_ROUTING_ALGORITHM_};
 // code end
 

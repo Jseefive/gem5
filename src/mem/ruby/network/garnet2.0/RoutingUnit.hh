@@ -89,6 +89,13 @@ class RoutingUnit
                          PortDirection inport_dirn);
     // code end
 
+    //// WestFirst: Declare routing function
+    // code begin
+    int outportComputeWestFirst(RouteInfo route,
+                         int inport,
+                         PortDirection inport_dirn);
+    // code end
+
     // Custom Routing Algorithm using Port Directions
     int outportComputeCustom(RouteInfo route,
                              int inport,
