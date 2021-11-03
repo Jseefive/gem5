@@ -209,6 +209,12 @@ class GarnetNetwork : public Network
     std::map<upDn_, char> global_upDn;
     // code end
 
+    //// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+    // code begin
+    Router*
+    get_RouterInDirn(PortDirection outport_dir, int upstream_id);
+    // code end
+
   protected:
     // Configuration
     int m_num_rows;

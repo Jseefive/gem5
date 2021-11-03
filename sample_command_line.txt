@@ -70,4 +70,33 @@ UpDown Routing for 3D SWNoC:
 --synthetic=shuffle
 -----------
 
+West First Routing for Mesh:
+-----------
+./build/Garnet_standalone/gem5.debug --outdir=m5out/Mesh_4x4_westfirst configs/example/garnet_synth_traffic.py  \
+--network=garnet2.0 \
+--num-cpus=16 \
+--num-dirs=16 \
+--topology=Mesh_XY \
+--routing-algorithm=5 \
+--mesh-rows=4  \
+--sim-cycles=100000 \
+--inj-vnet=0 \
+--injectionrate=0.02 \
+--synthetic=shuffle
+-----------
+
+West First Adaptive Routing for Mesh:
+-----------
+./build/Garnet_standalone/gem5.debug --outdir=m5out/Mesh_4x4_westfirst_adaptive configs/example/garnet_synth_traffic.py  \
+--network=garnet2.0 \
+--num-cpus=16 \
+--num-dirs=16 \
+--topology=Mesh_XY \
+--routing-algorithm=6 \
+--mesh-rows=4  \
+--sim-cycles=100000 \
+--inj-vnet=0 \
+--injectionrate=0.02 \
+--synthetic=shuffle
+-----------
 

@@ -50,10 +50,11 @@ class GarnetNetwork(RubyNetwork):
     #### Updown Routing: Add options
     #### Updown Routing+: Add options
     #### WestFirst: Add options
+    #### WestFirst Adaptive: Add options
     ## code begin
     routing_algorithm = Param.Int(0,
         "0: Weight-based Table, 1: XY, 2: Updown, 3: Updown+,\
-        4: XYZ, 5: WestFirst, 6: Custom");
+        4: XYZ, 5: WestFirst, 6: WestFirst_adaptive, 7: Custom");
     ## code begin
     enable_fault_model = Param.Bool(False, "enable network fault model");
     fault_model = Param.FaultModel(NULL, "network fault model");

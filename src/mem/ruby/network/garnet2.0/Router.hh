@@ -62,6 +62,12 @@ class Router : public BasicRouter, public Consumer
     ~Router() = default;
 
     void wakeup();
+
+    //// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+    // code begin
+    int get_numFreeVC(PortDirection dirn_);
+    // code end
+
     void print(std::ostream& out) const {};
 
     void init();

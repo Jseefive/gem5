@@ -57,10 +57,19 @@ class RoutingUnit
 
     // Topology-specific direction based routing
     void addInDirection(PortDirection inport_dirn, int inport);
+
     //// Updown Routing+: Implement of Updown Routing
     // code begin
     void addOutDirection(SwitchID dest,\
     PortDirection outport_dirn, int outport);
+    // code end
+
+    //// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+    // code begin
+    int get_inport_dirn2idx(PortDirection dir);
+    int get_outport_dirn2idx(PortDirection dir);
+    PortDirection get_inport_idx2dirn(int id);
+    PortDirection get_outport_idx2dirn(int id);
     // code end
 
     // Routing for Mesh
@@ -92,6 +101,13 @@ class RoutingUnit
     //// WestFirst: Declare routing function
     // code begin
     int outportComputeWestFirst(RouteInfo route,
+                         int inport,
+                         PortDirection inport_dirn);
+    // code end
+
+    //// WestFirst Adaptive: Declare routing function
+    // code begin
+    int outportComputeWestFirst_adaptive(RouteInfo route,
                          int inport,
                          PortDirection inport_dirn);
     // code end

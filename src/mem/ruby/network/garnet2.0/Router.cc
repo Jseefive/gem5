@@ -59,6 +59,8 @@ Router::init()
     crossbarSwitch.init();
 }
 
+
+
 void
 Router::wakeup()
 {
@@ -85,6 +87,19 @@ Router::wakeup()
     // Switch Traversal
     crossbarSwitch.wakeup();
 }
+
+//// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+// code begin
+int
+Router::get_numFreeVC(PortDirection inport_dirn)
+{
+    // Caution: This 'dirn_' is the direction of inport
+    // of downstream router...
+    assert(inport_dirn != "Local");
+    int inport_id = routingUnit.get_inport_dirn2idx(inport_dirn);
+    return (m_input_unit[inport_id]->get_numFreeVC(inport_dirn));
+}
+// code end
 
 void
 Router::addInPort(PortDirection inport_dirn,

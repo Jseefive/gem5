@@ -69,6 +69,7 @@ def define_options(parser):
     #### Updown Routing: Add options
     #### Updown Routing+: Add options
     #### WestFirst: Add options
+    #### WestFirst Adaptive: Add options
     ## code begin
     parser.add_option("--routing-algorithm", action="store", type="int",
                       default=0,
@@ -79,7 +80,8 @@ def define_options(parser):
                             3: Updown+ (for SWNoC. see...)
                             4: XYZ (see garnet2.0/RoutingUnit.cc)
                             5: WestFirst (see garnet2.0/RoutingUnit.cc)
-                            6: Custom (see garnet2.0/RoutingUnit.cc)""")
+                            6: WestFirst_adaptive (see ...)
+                            7: Custom (see garnet2.0/RoutingUnit.cc)""")
     ## code end
     parser.add_option("--network-fault-model", action="store_true",
                       default=False,

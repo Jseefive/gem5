@@ -360,6 +360,76 @@ GarnetNetwork::configure_network()
 
 // code end
 
+//// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+// code begin
+Router*
+GarnetNetwork::get_RouterInDirn( PortDirection outport_dir, int my_id )
+{
+    int num_cols = getNumCols();
+    int downstream_id = -1; // router_id for downstream router
+    // cout << "GarnetNetwork::get_RouterInDirn: outport_dir: "
+    // << outport_dir << endl;
+    // cout << "GarnetNetwork::get_RouterInDirn: my_id: "
+    // << my_id << endl;
+    // Do border control check here...
+
+    /* outport direction from the flit for this router */
+    if (outport_dir == "East") {
+        downstream_id = my_id + 1;
+        // constraints on downstream router-id
+        // for 4x4 Mesh, my_id != 3,7,11,15
+        for (int k=(num_cols-1); k < getNumRouters(); k+=num_cols ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "West") {
+        downstream_id = my_id - 1;
+        // constraints on downstream router-id
+        // for 4x4 Mesh, my_id != 0,4,8,12
+        for (int k=0; k < getNumRouters(); k+=num_cols ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "North") {
+        downstream_id = my_id + num_cols;
+        // constraints on downstream router-id
+        // for 4x4 Mesh, my_id != 12,13,14,15
+        for (int k=((num_cols-1)*num_cols); k < getNumRouters(); k+=1 ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "South") {
+        downstream_id = my_id - num_cols;
+        // constraints on downstream router-id
+        // for 4x4 Mesh, my_id != 0,1,2,3
+        for (int k=0; k < num_cols; k+=1 ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "Local"){
+        assert(0);
+        return NULL;
+    }
+    else {
+        assert(0); // for completion of if-else chain
+        return NULL;
+    }
+
+    // cout << "GarnetNetwork::get_RouterInDirn: downstream_id: "
+    // << downstream_id << endl;
+    // cout << "----------------" << endl;
+
+    if ((downstream_id < 0) || (downstream_id >= getNumRouters())) {
+        // constraints on downstream router-id
+        assert(0);
+        return NULL;
+    } else
+        return m_routers[downstream_id];
+        // return downstream_id;
+}
+// code end
+
+
 void
 GarnetNetwork::init()
 {

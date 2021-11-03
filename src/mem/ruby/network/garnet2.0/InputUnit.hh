@@ -146,6 +146,21 @@ class InputUnit : public Consumer
     uint32_t functionalWrite(Packet *pkt);
     void resetStats();
 
+    //// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+    // code begin
+    inline int get_numFreeVC(PortDirection dirn_)
+    {
+        assert(dirn_ == m_direction);
+        int freeVC = 0;
+        // since we always use vnet=0
+        for (int vc_=0; vc_ < m_vc_per_vnet; ++vc_) {
+            if (virtualChannels[vc_].isEmpty())
+                freeVC++;
+        }
+        return freeVC;
+    }
+    // code end
+
   private:
     Router *m_router;
     int m_id;

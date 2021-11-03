@@ -88,6 +88,19 @@ class VirtualChannel
 
     uint32_t functionalWrite(Packet *pkt);
 
+    //// WestFirst Adaptive: Implement of WestFirst Adaptive Routing
+    // code begin
+    bool
+    isEmpty()
+    {
+        // if size is 0 then sent true; false otherwise
+        if (inputBuffer.getSize() == 0)
+            return true;
+        else
+            return false;
+    }
+    // code end
+
   private:
     flitBuffer inputBuffer;
     std::pair<VC_state_type, Cycles> m_vc_state;
