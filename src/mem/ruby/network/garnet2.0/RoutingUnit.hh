@@ -44,9 +44,14 @@ class RoutingUnit
 {
   public:
     RoutingUnit(Router *router);
+
+    //// Updown Routing with Escape_VC
+    // code begin
     int outportCompute(RouteInfo route,
-                      int inport,
-                      PortDirection inport_dirn);
+                      int vc, int inport,
+                      PortDirection inport_dirn,
+                      bool check_upDn_port);
+    // code end
 
     // Topology-agnostic Routing Table based routing (default)
     void addRoute(const NetDest& routing_table_entry);
@@ -54,6 +59,11 @@ class RoutingUnit
 
     // get output port from routing table
     int  lookupRoutingTable(int vnet, NetDest net_dest);
+
+    //// Updown Routing with Escape_VC
+    // code begin
+    int  lookupRoutingTable_adaptive(int vnet, NetDest net_dest);
+    // code end
 
     // Topology-specific direction based routing
     void addInDirection(PortDirection inport_dirn, int inport);
@@ -79,9 +89,17 @@ class RoutingUnit
 
     //// Updown Routing: Declare routing function
     // code begin
+    //int outportComputeUPDN(RouteInfo route,
+    //                     int inport,
+    //                     PortDirection inport_dirn);
+    // code end
+
+    //// Updown Routing with Escape_VC
+    // code begin
     int outportComputeUPDN(RouteInfo route,
                          int inport,
-                         PortDirection inport_dirn);
+                         PortDirection inport_dirn,
+                         bool check_upDn_port);
     // code end
 
     //// Updown Routing+: Declare routing function

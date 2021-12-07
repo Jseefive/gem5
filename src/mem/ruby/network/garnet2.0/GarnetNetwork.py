@@ -55,7 +55,7 @@ class GarnetNetwork(RubyNetwork):
     routing_algorithm = Param.Int(0,
         "0: Weight-based Table, 1: XY, 2: Updown, 3: Updown+,\
         4: XYZ, 5: WestFirst, 6: WestFirst_adaptive, 7: Custom");
-    ## code begin
+    ## code end
     enable_fault_model = Param.Bool(False, "enable network fault model");
     fault_model = Param.FaultModel(NULL, "network fault model");
     garnet_deadlock_threshold = Param.UInt32(50000,
@@ -64,6 +64,10 @@ class GarnetNetwork(RubyNetwork):
     #### SWNoC
     ## code begin
     conf_file = Param.String("up-down routing configuration file")
+    ## code end
+    #### Updown Routing with Escape_VC
+    ## code begin
+    escape_vc = Param.UInt32(0, "if set to 1 then enable escapeVC")
     ## code end
 
 class GarnetNetworkInterface(ClockedObject):

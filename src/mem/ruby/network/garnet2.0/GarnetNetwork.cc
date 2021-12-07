@@ -74,6 +74,10 @@ GarnetNetwork::GarnetNetwork(const Params *p)
             << conf_file << endl;
     }
     // code end
+    //// Updown Routing with Escape_VC
+    // code begin
+    escape_vc = p->escape_vc;
+    // code end
     m_enable_fault_model = p->enable_fault_model;
     if (m_enable_fault_model)
         fault_model = p->fault_model;

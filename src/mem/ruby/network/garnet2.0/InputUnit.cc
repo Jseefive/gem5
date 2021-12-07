@@ -83,8 +83,11 @@ InputUnit::wakeup()
             set_vc_active(vc, m_router->curCycle());
 
             // Route computation for this vc
+            //// Updown Routing with Escape_VC
+            // code begin
             int outport = m_router->route_compute(t_flit->get_route(),
-                m_id, m_direction);
+                            vc, m_id, m_direction, false);
+            // code end
 
             // Update output port in VC
             // All flits in this packet will use this output port

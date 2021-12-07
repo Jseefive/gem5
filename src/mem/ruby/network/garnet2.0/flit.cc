@@ -45,6 +45,10 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
     m_route = route;
     m_stage.first = I_;
     m_stage.second = m_time;
+    //// Updown Routing with Escape_VC
+    // code begin
+    m_injection_vc = vc;
+    // code end
 
     if (size == 1) {
         m_type = HEAD_TAIL_;

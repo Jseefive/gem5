@@ -34,6 +34,12 @@
 #include "base/logging.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
+
+//// Updown Routing with Escape_VC
+// code begin
+#include "mem/ruby/network/garnet2.0/OutputUnit.hh"
+
+// code end
 #include "mem/ruby/slicc_interface/Message.hh"
 
 RoutingUnit::RoutingUnit(Router *router)
@@ -112,6 +118,80 @@ RoutingUnit::lookupRoutingTable(int vnet, NetDest msg_destination)
     return output_link;
 }
 
+//// Updown Routing with Escape_VC
+// code begin
+int
+RoutingUnit::lookupRoutingTable_adaptive(int vnet, NetDest msg_destination)
+{
+
+    int output_link = -1;
+    int min_weight = INFINITE_;
+    std::vector<int> output_link_candidates;
+    int num_candidates = 0;
+
+    // Identify the minimum weight among the candidate output links
+    for (int link = 0; link < m_routing_table.size(); link++) {
+        if (msg_destination.intersectionIsNotEmpty(m_routing_table[link])) {
+
+        if (m_weight_table[link] <= min_weight)
+            min_weight = m_weight_table[link];
+        }
+    }
+
+    // Collect all candidate output links with this minimum weight
+    for (int link = 0; link < m_routing_table.size(); link++) {
+        if (msg_destination.intersectionIsNotEmpty(m_routing_table[link])) {
+
+            if (m_weight_table[link] == min_weight) {
+
+                num_candidates++;
+                output_link_candidates.push_back(link);
+            }
+        }
+    }
+
+    if (output_link_candidates.size() == 0) {
+        fatal("Fatal Error:: No Route exists from this Router.");
+        exit(0);
+    }
+
+    // Randomly select any candidate output link
+    //int candidate = 0;
+    //if (!(m_router->get_net_ptr())->isVNetOrdered(vnet))
+    //    candidate = rand() % num_candidates;
+
+    // Choose the candidate output link,
+    // whose outport has the largest number of free vc (Adaptive)
+    int outport_id;		// outport ID
+    int accum_;			// credit count
+    // (free vc number of outport)
+    std::vector<int>outport_credit_index;  // credit count vector
+
+    // 1 loop through the candidate links, get credit count
+    for (int i = 0; i < output_link_candidates.size(); i++) {
+        outport_id = output_link_candidates[i];
+        // get credit count
+        accum_ = 0;
+        // -------------------------------------------------- //
+        accum_ += m_router->getOutputUnit(outport_id) \
+                    ->getNumFreeVCs(vnet);
+        outport_credit_index.push_back(accum_);
+    }
+
+    // 2 get the outport index of max credit count in vector
+    int max = -1;
+    int candidate = -1;
+    for (int i = 0; i < outport_credit_index.size(); i++ ) {
+        if (outport_credit_index[i] > max) {
+            max = outport_credit_index[i];
+            candidate = i;
+        }
+    }
+
+    output_link = output_link_candidates.at(candidate);
+    return output_link;
+}
+// code end
 
 void
 RoutingUnit::addInDirection(PortDirection inport_dirn, int inport_idx)
@@ -163,9 +243,13 @@ PortDirection RoutingUnit::get_outport_idx2dirn(int id)
 // implementations using port directions rather than a static routing
 // table is provided here.
 
+//// Updown Routing with Escape_VC
+// code begin
 int
-RoutingUnit::outportCompute(RouteInfo route, int inport,
-                            PortDirection inport_dirn)
+RoutingUnit::outportCompute(RouteInfo route, int vc, int inport,
+                            PortDirection inport_dirn,
+                            bool check_upDn_port)
+// code end
 {
     int outport = -1;
 
@@ -183,31 +267,53 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
     RoutingAlgorithm routing_algorithm =
         (RoutingAlgorithm) m_router->get_net_ptr()->getRoutingAlgorithm();
 
-    //// Updown Routing: Implement of routing switch function
-    //// Updown Routing+: Implement of routing switch function
-    //// WestFirst: Implement of routing switch function
+    //// Updown Routing with Escape_VC
     // code begin
-    switch (routing_algorithm) {
-        case TABLE_:  outport =
-            lookupRoutingTable(route.vnet, route.net_dest); break;
-        case XY_:     outport =
-            outportComputeXY(route, inport, inport_dirn); break;
-        case UPDN_:     outport =
-            outportComputeUPDN(route, inport, inport_dirn); break;
-        case UPDNP_:     outport =
-            outportComputeUPDNP(route, inport, inport_dirn); break;
-        case XYZ_:     outport =
-            outportComputeXYZ(route, inport, inport_dirn); break;
-        case WEST_FIRST_:     outport =
-            outportComputeWestFirst(route, inport, inport_dirn); break;
-        case WEST_FIRST_ADAPTIVE_:     outport =
-            outportComputeWestFirst_adaptive(route, inport, inport_dirn);
-            break;
-        // any custom algorithm
-        case CUSTOM_: outport =
-            outportComputeCustom(route, inport, inport_dirn); break;
-        default: outport =
-            lookupRoutingTable(route.vnet, route.net_dest); break;
+    if (m_router->get_net_ptr()->escape_vc == 0) {
+        //// Updown Routing: Implement of routing switch function
+        //// Updown Routing+: Implement of routing switch function
+        //// WestFirst: Implement of routing switch function
+        // code begin
+        switch (routing_algorithm) {
+            case TABLE_:  outport =
+                lookupRoutingTable(route.vnet, route.net_dest); break;
+            case XY_:     outport =
+                outportComputeXY(route, inport, inport_dirn); break;
+            case UPDN_:     outport =
+                outportComputeUPDN(route, inport, inport_dirn,
+                                    check_upDn_port); break;
+            case UPDNP_:     outport =
+                outportComputeUPDNP(route, inport, inport_dirn); break;
+            case XYZ_:     outport =
+                outportComputeXYZ(route, inport, inport_dirn); break;
+            case WEST_FIRST_:     outport =
+                outportComputeWestFirst(route, inport, inport_dirn); break;
+            case WEST_FIRST_ADAPTIVE_:     outport =
+                outportComputeWestFirst_adaptive(route, inport, inport_dirn);
+                break;
+            // any custom algorithm
+            case CUSTOM_: outport =
+                outportComputeCustom(route, inport, inport_dirn); break;
+            default: outport =
+                lookupRoutingTable(route.vnet, route.net_dest); break;
+        }
+        // code end
+    } else if ((routing_algorithm == UPDN_) &&
+                (m_router->get_net_ptr()->escape_vc == 1)) {
+        // get vc_base and escapeVC of current vnet
+        int vc_base = route.vnet*m_router->get_vc_per_vnet();
+        int escapeVC = vc_base + (m_router->get_vc_per_vnet() - 1);
+        // if vc is escapeVC, compute outport using UpDown Routing
+        if (vc == escapeVC || check_upDn_port) {
+            outport = outportComputeUPDN(route, inport, inport_dirn,
+                                        check_upDn_port);
+        } else {
+            // else using lookupRoutingTable_adaptive
+            outport = lookupRoutingTable_adaptive(route.vnet, route.net_dest);
+        }
+    } else {
+        std::cout << "Invalid value of 'escape_vc'!" << std::endl;
+        assert(0);
     }
     // code end
 
@@ -279,14 +385,39 @@ RoutingUnit::outportComputeXY(RouteInfo route,
 int
 RoutingUnit::outportComputeUPDN(RouteInfo route,
                     int inport,
-                    PortDirection inport_dirn)
+                    PortDirection inport_dirn,
+                    bool check_upDn_port)
+// code end
 {
     PortDirection outport_dirn = "Unknown";
 
+    //// Updown Routing with Escape_VC
+    // code begin
+    // check_upDn_port: only for getting upDn_outport
+    if (check_upDn_port)
+        assert(route.new_src == -1);
+    // code begin
+
     // get curr_id, dest_id and stc_id
     int curr_id = m_router->get_id();
-    int src_id = route.src_router;
+    int src_id;
     int dest_id = route.dest_router;
+
+    //// Updown Routing with Escape_VC
+    // code begin
+    // get src_id
+    if (check_upDn_port) {
+        src_id = curr_id;
+    } else {
+        if (route.new_src == -1)
+            // if no escapeVC
+            src_id = route.src_router;
+        else
+            // if escapeVC
+            // new_src set in OutputUnit::select_free_vc
+            src_id = route.new_src;
+    }
+    // code end
 
     // if current id is the source id
     if (curr_id == src_id) {

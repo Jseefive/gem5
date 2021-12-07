@@ -83,6 +83,14 @@ def define_options(parser):
                             6: WestFirst_adaptive (see ...)
                             7: Custom (see garnet2.0/RoutingUnit.cc)""")
     ## code end
+    #### Updown Routing with Escape_VC
+    ## code begin
+    parser.add_option("--escape-vc", action="store", type="int", default=0,
+                      help="""if set 1 will enable up-dn routing present in the
+                            configuration file passed as the commandline
+                            argument only in escape VC, all other would be
+                            random""")
+    ## code end
     parser.add_option("--network-fault-model", action="store_true",
                       default=False,
                       help="""enable network fault model:
@@ -133,6 +141,10 @@ def init_network(options, network, InterfaceClass):
         network.vcs_per_vnet = options.vcs_per_vnet
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm
+        #### Updown Routing with Escape_VC
+        ## code begin
+        network.escape_vc = options.escape_vc
+        ## code end
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
         #### irregular_Mesh_XY: add configs file option
         #### SWNoC: add configs file option

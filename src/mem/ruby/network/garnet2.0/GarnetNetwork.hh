@@ -65,7 +65,6 @@ class GarnetNetwork : public Network
 
     //// Updown Routing
     // code begin
-
     void populate_routingTable(\
                        std::vector<int>& path_, int ylen);
 
@@ -169,6 +168,11 @@ class GarnetNetwork : public Network
     //// SWNoC
     // code begin
     std::string conf_file;
+    // code end
+
+    //// Updown Routing with Escape_VC
+    // code begin
+    uint32_t escape_vc;
     // code end
 
     //// Updown Routing

@@ -63,6 +63,10 @@ struct RouteInfo
     int dest_ni;
     int dest_router;
     int hops_traversed;
+    //// Updown Routing with Escape_VC
+    // code begin
+    int new_src;
+    // code end
 };
 
 #define INFINITE_ 10000
