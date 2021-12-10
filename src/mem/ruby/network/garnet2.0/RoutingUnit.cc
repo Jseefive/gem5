@@ -282,8 +282,12 @@ RoutingUnit::outportCompute(RouteInfo route, int vc, int inport,
             case UPDN_:     outport =
                 outportComputeUPDN(route, inport, inport_dirn,
                                     check_upDn_port); break;
+            //// Updown Routing with Escape_VC for 3D SWNoC
+            // code begin
             case UPDNP_:     outport =
-                outportComputeUPDNP(route, inport, inport_dirn); break;
+                outportComputeUPDNP(route, inport, inport_dirn,
+                                    check_upDn_port); break;
+            // code end
             case XYZ_:     outport =
                 outportComputeXYZ(route, inport, inport_dirn); break;
             case WEST_FIRST_:     outport =
@@ -311,6 +315,22 @@ RoutingUnit::outportCompute(RouteInfo route, int vc, int inport,
             // else using lookupRoutingTable_adaptive
             outport = lookupRoutingTable_adaptive(route.vnet, route.net_dest);
         }
+    //// Updown Routing with Escape_VC for 3D SWNoC
+    // code begin
+    } else if ((routing_algorithm == UPDNP_) &&
+                (m_router->get_net_ptr()->escape_vc == 1)) {
+        // get vc_base and escapeVC of current vnet
+        int vc_base = route.vnet*m_router->get_vc_per_vnet();
+        int escapeVC = vc_base + (m_router->get_vc_per_vnet() - 1);
+        // if vc is escapeVC, compute outport using UpDown Routing
+        if (vc == escapeVC || check_upDn_port) {
+            outport = outportComputeUPDNP(route, inport, inport_dirn,
+                                        check_upDn_port);
+        } else {
+            // else using lookupRoutingTable_adaptive
+            outport = lookupRoutingTable_adaptive(route.vnet, route.net_dest);
+        }
+    // code end
     } else {
         std::cout << "Invalid value of 'escape_vc'!" << std::endl;
         assert(0);
@@ -450,19 +470,45 @@ RoutingUnit::outportComputeUPDN(RouteInfo route,
 // code end
 
 //// Updown Routing+: Implement of Updown Routing
+//// Updown Routing+: Implement of Updown Routing
 // code begin
 int
 RoutingUnit::outportComputeUPDNP(RouteInfo route,
                     int inport,
-                    PortDirection inport_dirn)
+                    PortDirection inport_dirn,
+                    bool check_upDn_port)
+// code end
 {
     //PortDirection outport_dirn = "Unknown";
     int nxt_router_id = 0;
 
+    //// Updown Routing with Escape_VC for 3D SWNoC
+    // code begin
+    // check_upDn_port: only for getting upDn_outport
+    if (check_upDn_port)
+        assert(route.new_src == -1);
+    // code begin
+
     // get curr_id, dest_id and stc_id
     int curr_id = m_router->get_id();
-    int src_id = route.src_router;
+    int src_id;
     int dest_id = route.dest_router;
+
+    //// Updown Routing with Escape_VC for 3D SWNoC
+    // code begin
+    // get src_id
+    if (check_upDn_port) {
+        src_id = curr_id;
+    } else {
+        if (route.new_src == -1)
+            // if no escapeVC
+            src_id = route.src_router;
+        else
+            // if escapeVC
+            // new_src set in OutputUnit::select_free_vc
+            src_id = route.new_src;
+    }
+    // code end
 
     // if current id is the source id
     if (curr_id == src_id) {

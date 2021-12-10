@@ -104,9 +104,17 @@ class RoutingUnit
 
     //// Updown Routing+: Declare routing function
     // code begin
+    //int outportComputeUPDNP(RouteInfo route,
+    //                     int inport,
+    //                     PortDirection inport_dirn);
+    // code end
+
+    //// Updown Routing with Escape_VC for 3D SWNoC
+    // code begin
     int outportComputeUPDNP(RouteInfo route,
                          int inport,
-                         PortDirection inport_dirn);
+                         PortDirection inport_dirn,
+                         bool check_upDn_port);
     // code end
 
     //// XYZ Routing: Declare routing function
